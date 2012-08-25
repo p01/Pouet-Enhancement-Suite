@@ -1,4 +1,4 @@
-/*jslint devel: true, browser: true*/
+/*jslint browser: true, jquery:true*/
 
 var PESInit = (function(){
 	"use strict";
@@ -42,8 +42,9 @@ var PESInit = (function(){
 			oneliner = oneliner.parent().parent().parent();
 			
 			//the complete oneliner even needs more parent() calls
-			if(!oneliner.parent().hasClass('box'))
+			if(!oneliner.parent().hasClass('box')) {
 				oneliner = oneliner.parent().parent().parent().parent();
+			}
 			
 			//use the user images and their link as hook, to get their parent <tr>
 			onelinerLine = $(oneliner.find('a[href^="user.php?who"]').parent().parent());
@@ -59,8 +60,6 @@ var PESInit = (function(){
 var PESInitReadyCheck = (function () {
 
     "use strict";
-    
-    console.log("wub!");
     
     $(document).ready(PESInit);
 });

@@ -9,7 +9,12 @@
   "content_scripts": [
 	{
       "matches": [
-      	"http://pouet.net/*"
+      	"http://pouet.net/",
+      	"http://pouet.net/index.php",
+      	"http://pouet.net/oneliner.php",
+      	"http://www.pouet.net/",
+		"http://www.pouet.net/index.php",
+		"http://www.pouet.net/oneliner.php"
       ],
       "js" : [
       	"jquery-1.8.0.min.js",

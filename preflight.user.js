@@ -24,7 +24,7 @@ textArea.onkeyup = startKBPreviewUpdateDDoSPreventionTimer;
 function startKBPreviewUpdateDDoSPreventionTimer(e) {
   
     clearInterval(cooldownTimer);
-	cooldownTimer = setTimeout(updatePreview, 500);
+	cooldownTimer = setTimeout(updatePreview, 1000);
 }
 
 function updatePreview() {

@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name       PouetWindowShopping
-// @namespace  https://github.com/mog/Pouet-Enhancement-Suite/
 // @version    0.0.1
-// @description  show screenshots on prod table views
+// @description  Small screenshots on prodlists views
 // @match      http://pouet.net/groups.php?which*
+// @match      http://pouet.net/party.php?which*
 // @copyright  2013+, mog@trbl.at
 // ==/UserScript==
 
@@ -14,13 +14,28 @@ var MAX_IMG_HEIGHT = 48,
     
 var p = document.querySelectorAll("a[href^='prod.php']");
 
-//fix header table (groupname/..) | bottom one as well - no need to traverse
-document.querySelectorAll("th[colspan='9']")[0].setAttribute("colspan", "10");
-document.querySelectorAll("td[colspan='9']")[0].setAttribute("colspan", "10");
+//group prod listing | fix header table (groupname/..) | bottom one as well
+if(document.querySelectorAll("th[colspan='9']").length > 0) {
+    document.querySelectorAll("th[colspan='9']")[0].setAttribute("colspan", "10");
+	document.querySelectorAll("td[colspan='9']")[0].setAttribute("colspan", "10");
+}
 
-//sortableRow add new td at the beginning
+//group prod listing | "sort header"-row add new td at the beginning
 var sortableRow = document.querySelectorAll("tr[bgcolor='#224488']")[1];
-sortableRow.insertBefore(document.createElement('th'), sortableRow.firstElementChild);
+
+if(sortableRow) {
+    
+	sortableRow.insertBefore(document.createElement('th'), sortableRow.firstElementChild);
+    
+} else {
+	//party prod listing | get the sort headers
+	var partyProdsTable = document.querySelectorAll("body > div > table")[2];
+    sortableRow = partyProdsTable.querySelectorAll("table[cellpadding='2'] > tbody > tr:not([bgcolor])");
+    
+    for(var i = 0; i < sortableRow.length; i++) {
+    	sortableRow[i].firstElementChild.setAttribute('colspan', '2');
+    }
+}
 
 function handleImg404(e){
     var currentURL = e.target.getAttribute('src').split('.'),
@@ -42,7 +57,7 @@ for(var i = 0; i < p.length; i++){
             link = document.createElement('a'),
             prodLinkCell = p[i].parentNode.parentNode.parentNode.parentNode.parentNode;
             
-          td.style.cssText = "padding:0;text-align:center;background:" + IMG_BACKGROUND+";";
+        	td.style.cssText = "padding:0;text-align:center;background:" + IMG_BACKGROUND+";";
         
             //as we don't want to change any other table on the page
         	if(VERTICAL_CENTER_TEXT)

@@ -1,74 +1,61 @@
 // ==UserScript==
-// @name       preFlight
-// @version    0.0.3
+// @name         preFlight
+// @version      0.0.4
 // @description  shows the preview of a thread response under the message field
-// @match      http://pouet.net/topic.php?which*
-// @copyright  2013+, mog@trbl.at
+// @include      http://pouet.net/topic.php?which*
+// @include      http://www.pouet.net/topic.php?which*
+// @copyright    2013+, mog@trbl.at & mathieu@p01.org
 // ==/UserScript==
 
-var textArea = document.querySelector("textarea[name='message']"),
-    form = document.querySelector("form[action='add.php']"),
-    previewFrame = document.createElement('iframe'),
-    cooldownTimer,
-    lastHash = 0;
+;(function() {
+    var textArea = document.querySelector("textarea[name='message']"),
+        form = document.querySelector("form[action='add.php']"),
+        previewFrame = document.createElement('iframe'),
+        lastEvent = 0,
+        lastValue = "",
+        throttleDelay = 250,
+        throttleTimeout;
 
-previewFrame.setAttribute('name', 'previewFrame');
-previewFrame.setAttribute('scrolling', 'no');
-previewFrame.style.cssText = 'border:0;width:100%;';
+    if(!textArea || !form)
+        return;
 
-previewFrame.onload = resizePreview;
+    previewFrame.setAttribute('name', 'previewFrame'+Math.random());
+    previewFrame.setAttribute('scrolling', 'no');
+    previewFrame.style.cssText = 'border: 0; width: 100%;';
+    previewFrame.onload = function() {
+        previewFrame.height = previewFrame.contentWindow.document.body.scrollHeight + 'px';
+    };
 
-textArea.onkeyup = startKBPreviewUpdateDDoSPreventionTimer;
+    textArea.oninput = textArea.onkeyup = function updatePreview() {
 
-//from http://stackoverflow.com/a/7616484
-function hashString(str){
-  
-    var hash = 0, i, char;
-  
-    if (str.length == 0)
-      return hash;
-  
-    for (i = 0; i < str.length; i++) {
-        char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-  
-    return hash;
-}
+        clearTimeout(throttleTimeout);
 
-function startKBPreviewUpdateDDoSPreventionTimer(e) {
-  
-    clearTimeout(cooldownTimer);
-	cooldownTimer = setTimeout(updatePreview, 1000);
-}
+        // too fast ?
+        var now = Date.now();
+        var dif = now - lastEvent;
+        lastEvent = now;
+        if(dif < throttleDelay)
+            return throttleTimeout = setTimeout(updatePreview, throttleDelay);
 
-function updatePreview() {
-	
-  	var newHash = hashString(textArea.value),
-        type = 'topic',
-		oldAction = form.action;
-  
-    clearTimeout(cooldownTimer);
+        // no change ?
+        var trimmedValue = textArea.value.replace(/^\s+|\s+$/g, "");
+        if(trimmedValue == lastValue)
+            return;
 
- 	//if nothing changed we change nothing either
-	if(lastHash !== newHash)
-      lastHash = newHash;
-  	else
-      return;
-    
-    if(!previewFrame.parentNode)
-        form.parentNode.insertBefore(previewFrame, form.nextSibling);
-    
-    previewFrame.setAttribute('src', 'preview_' + type + '.php');
-	form.action = 'preview_' + type + '.php';
-	form.target = 'previewFrame';
-  	form.submit();
-    
-    form.action = oldAction;
-    form.target = '_self';
-}
+        // first input ?
+        if(!previewFrame.parentNode)
+            return form.parentNode.insertBefore(previewFrame, form.nextSibling);
 
-function resizePreview() {
-	previewFrame.height = previewFrame.contentWindow.document.body.scrollHeight + 'px';
-}
+        // preview!
+        lastValue = trimmedValue;
+        var oldAction = form.action;
+        var type = (location.pathname.match(/\/(\w+)\.php/)||['topic']).pop();
+        form.action = 'preview_' + type + '.php';
+        form.target = previewFrame.name;
+        form.submit();
+
+        form.action = oldAction;
+        form.target = '_self';
+    };
+
+})();

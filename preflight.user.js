@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       preFlight
-// @version    0.0.1
+// @version    0.0.2
 // @description  shows the preview of a thread response under the message field
 // @match      http://pouet.net/topic.php?which*
 // @copyright  2013+, mog@trbl.at

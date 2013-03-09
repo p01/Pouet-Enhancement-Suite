@@ -23,7 +23,7 @@ textArea.onkeyup = startKBPreviewUpdateDDoSPreventionTimer;
 
 function startKBPreviewUpdateDDoSPreventionTimer(e) {
   
-    clearInterval(cooldownTimer);
+    clearTimeout(cooldownTimer);
 	cooldownTimer = setTimeout(updatePreview, 1000);
 }
 
@@ -34,7 +34,7 @@ function updatePreview() {
         form.parentNode.insertBefore(previewFrame, form.nextSibling);
     }
     
-    clearInterval(cooldownTimer);
+    clearTimeout(cooldownTimer);
     
     var type = 'topic',
 		oldAction = form.action;
@@ -49,5 +49,5 @@ function updatePreview() {
 }
 
 function resizePreview() {
-	previewFrame.height = parseInt(previewFrame.contentWindow.document.body.scrollHeight, 10) + 'px';
+	previewFrame.height = previewFrame.contentWindow.document.body.scrollHeight + 'px';
 }

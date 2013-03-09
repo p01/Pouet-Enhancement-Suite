@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name       preFlight
-// @version    0.0.2
+// @version    0.0.3
 // @description  shows the preview of a thread response under the message field
 // @match      http://pouet.net/topic.php?which*
 // @copyright  2013+, mog@trbl.at
 // ==/UserScript==
 
-var textArea = document.querySelectorAll("textarea[name='message']")[0],
-    form = document.querySelectorAll("form[action='add.php']")[0],
+var textArea = document.querySelector("textarea[name='message']"),
+    form = document.querySelector("form[action='add.php']"),
     previewFrame = document.createElement('iframe'),
-    firstKeypress = true,
-    cooldownTimer;
+    cooldownTimer,
+    lastHash = 0;
 
 previewFrame.setAttribute('name', 'previewFrame');
 previewFrame.setAttribute('scrolling', 'no');
@@ -20,6 +20,22 @@ previewFrame.onload = resizePreview;
 
 textArea.onkeyup = startKBPreviewUpdateDDoSPreventionTimer;
 
+//from http://stackoverflow.com/a/7616484
+function hashString(str){
+  
+    var hash = 0, i, char;
+  
+    if (str.length == 0)
+      return hash;
+  
+    for (i = 0; i < str.length; i++) {
+        char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+  
+    return hash;
+}
 
 function startKBPreviewUpdateDDoSPreventionTimer(e) {
   
@@ -29,15 +45,20 @@ function startKBPreviewUpdateDDoSPreventionTimer(e) {
 
 function updatePreview() {
 	
-    if(firstKeypress){
-        firstKeypress = false;
-        form.parentNode.insertBefore(previewFrame, form.nextSibling);
-    }
-    
-    clearTimeout(cooldownTimer);
-    
-    var type = 'topic',
+  	var newHash = hashString(textArea.value),
+        type = 'topic',
 		oldAction = form.action;
+  
+    clearTimeout(cooldownTimer);
+
+ 	//if nothing changed we change nothing either
+	if(lastHash !== newHash)
+      lastHash = newHash;
+  	else
+      return;
+    
+    if(!previewFrame.parentNode)
+        form.parentNode.insertBefore(previewFrame, form.nextSibling);
     
     previewFrame.setAttribute('src', 'preview_' + type + '.php');
 	form.action = 'preview_' + type + '.php';
